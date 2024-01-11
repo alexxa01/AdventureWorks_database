@@ -1,0 +1,1199 @@
+use master
+
+create database AdventureWorks2019_project
+
+use AdventureWorks2019_project
+
+--People(Person)
+
+create table Person.Address(
+AddressID int identity(1,1) not null,
+AddressLine1 nvarchar(60) not null,
+AddressLine2 nvarchar(60) null,
+City nvarchar(30) not null,
+StateProvinceID int not null,
+PostalCode nvarchar(15) not null,
+SpatialLocation geography null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.Address
+add constraint FK_Address_StateProvince foreign key (StateProvinceID) references Person.StateProvince(StateProvinceID)
+alter table Person.Address
+add constraint PK_AddressID primary key(AddressID)
+
+
+
+
+
+create table Person.AddressType(
+AddressTypeID int identity(1,1) not null,
+Name nvarchar(50) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.AddressType
+add constraint PK_AddressType primary key(AddressTypeID)
+
+
+
+
+
+create table Person.BusinessEntity(
+BusinessEntityID int identity(1,1) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.BusinessEntity
+add constraint PK_BusinessEntityID primary key(BusinessEntityID)
+
+
+
+
+
+create table Person.BusinessEntityAddress(
+BusinessEntityID int not null,
+AddressID int not null,
+AddressTypeID int not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.BusinessEntityAddress
+add constraint FK_BusinessEntity_Address foreign key (BusinessEntityID) references Person.BusinessEntity (BusinessEntityID)
+alter table Person.BusinessEntityAddress
+add constraint FK_Address_BusinessEntity foreign key (AddressTypeID) references Person.AddressType(AddressTypeID)
+alter table Person.BusinessEntityAddress
+add constraint PK_BusinessEntityAdressID primary key(AddressID)
+
+
+
+
+
+create table Person.BusinessEntityContact(
+BusinessEntityID int not null,
+PersonID int not null,
+ContactTypeID int not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+
+alter table Person.BusinessEntityContact
+add constraint FK_Business_Entity_Address foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+alter table Person.BusinessEntityContact
+add constraint Fk_BusinessEntity_Person foreign key (PersonID) references Person.BusinessEntity(BusinessEntityID)
+alter table Person.BusinessEntityContact
+add constraint FK_BusinessEntityContact_ContactType_ContactTypeID foreign key (ContactTypeID) references Person.ContactType(ContactTypeID)
+alter table Person.BusinessEntityContact
+add constraint PK_BusinessEntityContact primary key(BusinessEntityID,PersonID,ContactTypeID)
+
+
+
+
+
+create table Person.ContactType(
+ContactTypeID int identity(1,1) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null,
+)
+alter table Person.ContactType
+add constraint PK_ContactType primary key (ContactTypeID)
+
+
+
+
+
+
+create table Person.CountryRegion(
+CountryRegionCode nvarchar(3) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null
+)
+alter table Person.CountryRegion 
+add constraint PK_CountryRegion primary key (CountryRegionCode)
+
+
+
+
+
+create table Person.EmailAddress(
+BusinessEntityID int not null,
+EmailAddressID int identity(1,1) not null,
+EmailAddress nvarchar(50) null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.EmailAddress
+add constraint PK_EmailAddress primary key (BusinessEntityID,EmailAddressID)
+alter table Person.EmailAddress
+add constraint FK_EmailAddress_Person_BusinessEntityID foreign key (BusinessEntityID) references  Person.BusinessEntity(BusinessEntityID)
+
+
+
+
+
+
+create table Person.Password(
+BusinessEntityID int not null,
+PasswordHash varchar(128) not null,
+PasswordSalt varchar(10) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.Password 
+add constraint FK_Password_Person_BusinessEntityID foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+
+
+
+
+
+create table Person.Person(
+BusinessEntityID int not null,
+PersonType nchar(2) not null,
+NameStyle bit not null,
+Title nvarchar(8) null,
+FirstName nvarchar(50) not null,
+MiddleName nvarchar(50) null,
+LastName nvarchar(50) not null,
+Suffix nvarchar(10) null,
+EmailPromotion int not null,
+AdditionalContactInfo xml  null,
+Demographics xml null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Person.Person
+add constraint PK_Person_BusinessEntityID primary key (BusinessEntityID)
+alter table Person.Person
+add constraint FK_Person_BusinessEntity_BusinessEntityID foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+
+
+
+
+
+create table Person.PersonPhone(
+BusinessEntityID int not null,
+PhoneNumber nvarchar(25) not null,
+PhoneNumberTypeID int not null,
+ModifiedDate datetime not null
+)
+alter table Person.PersonPhone
+add constraint PK_PersonPhone primary key(PhoneNumber)
+alter table Person.PersonPhone 
+add constraint FK_PersonPhone_Person_BusinessEntityID foreign key(BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+alter table Person.PersonPhone
+add constraint FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID foreign key (PhoneNumberTypeID) references Person.PhoneNumberType(PhoneNumberTypeID)
+
+
+
+create table Person.PhoneNumberType(
+PhoneNumberTypeID int not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null
+)
+alter table Person.PhoneNumberType
+add constraint PK_PhoneNumberType primary key (PhoneNumberTypeID)
+
+
+
+
+
+
+create table Person.StateProvince(
+StateProvinceID int not null,
+StateProvinceCode nchar(3) not null,
+CountryRegionCode nvarchar(3) not null,
+IsOnlyStateProvinceFlag bit not null,
+Name nvarchar(50) not null,
+TerritoryID int not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+
+alter table Person.StateProvince
+add constraint StateProvinceID primary key (StateProvinceID) 
+alter table Person.StateProvince
+add constraint FK_StateProvince_CountryRegion_CountryRegionCode foreign key (CountryRegionCode) references Person.CountryRegion(CountryRegionCode)
+alter table Person.StateProvince
+add constraint FK_StateProvince_SalesTerritory_TerritoryID foreign key (TerritoryID) references Sales.SalesTerritory(TerritoryID)
+
+
+
+
+--HumanResources
+
+create table HumanResources.Department(
+DepartmentID smallint identity (1,1) not null,
+Name nvarchar(50) not null,
+GroupName nvarchar(50) not null,
+ModifiedDate datetime not null	
+)
+alter table HumanResources.Department
+add constraint PK_DepartmentID primary key (DepartmentID)
+
+
+
+create table HumanResources.Employee(
+BusinessEntityID int identity (1,1) not null,
+NationalIDNumber nvarchar(15) not null,
+LoginID nvarchar(256) not null,
+OrganizationNode hierarchyid,
+OrganizationLevel smallint,
+JobTitle nvarchar(50) not null,
+BirthDate date not null,
+MaritalStatus nchar(1) not null,
+Gender nchar(1) not null,
+HireDate date not null,
+SalariedFlag bit not null,
+VacationHours smallint not null,
+SickLeaveHours smallint not null,
+CurrentFlag bit not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table HumanResources.Employee
+add constraint PK_Employee_BusinessEntityID primary key (BusinessEntityID)
+alter table HumanResources.Employee
+add constraint FK_Employee_Person_BusinessEntityID foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+
+
+create table HumanResources.EmployeeDepartmentHistory(
+BusinessEntityID int not null,
+DepartmentID smallint not null,
+ShiftID tinyint not null,
+StartDate date not null,
+EndDate date null,
+ModifiedDate datetime not null
+)
+alter table HumanResources.EmployeeDepartmentHistory
+add constraint FK_EmployeeDepartmentHistory_Department_DepartmentID foreign key (DepartmentID) references HumanResources.Department(DepartmentID)
+alter table HumanResources.EmployeeDepartmentHistory
+add constraint FK_EmployeeDepartmentHistory_Employee_BusinessEntityID foreign key (BusinessEntityID) references HumanResources.Employee(BusinessEntityID)
+alter table HumanResources.EmployeeDepartmentHistory
+add constraint FK_EmployeeDepartmentHistory_Shift_ShiftID foreign key (ShiftID) references HumanResources.Shift(ShiftID)
+
+
+
+
+
+create table HumanResources.EmployeePayHistory(
+BusinessEntityID int not null,
+RateChangeDate datetime not null,
+Rate money not null,
+PayFrequency tinyint not null,
+ModifiedDate datetime not null
+)
+alter table HumanResources.EmployeePayHistory
+add constraint FK_EmployeePayHistory_Employee_BusinessEntityID foreign key (BusinessEntityID) references HumanResources.Employee(BusinessEntityID)
+
+
+
+
+
+create table HumanResources.JobCandidate(
+JobCandidateID int identity(1,1) not null,
+BusinessEntityID int null,
+Resume xml null,
+ModifiedDate datetime not null
+)
+alter table HumanResources.JobCandidate
+add constraint FK_JobCandidate_Employee_BusinessEntityID foreign key (BusinessEntityID) references HumanResources.Employee(BusinessEntityID)
+
+
+
+
+create table HumanResources.Shift(
+ShiftID tinyint identity(1,1) not null,
+Name nvarchar(50) not null,
+StartTime time(7) not null,
+EndTime time(7) not null,
+ModifiedDate datetime not null
+)
+alter table HumanResources.Shift
+add constraint PK_HumanResources_Shift primary key (ShiftID)
+
+
+
+
+--Production
+
+create table Production.Culture(
+CultureID nchar(6) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null
+)
+alter table Production.Culture
+add constraint PK_Culture primary key (CultureID)
+
+
+
+
+create table Production.Document(
+DocumentNode hierarchyid not null,
+DocumentLevel smallint null,
+Title nvarchar(50) not null,
+Owner int not null,
+FolderFlag bit not null,
+FileName nvarchar(400) not null,
+FileExtension nvarchar(8) not null,
+Revision nchar(5) not null,
+ChangeNumber int not null,
+Status tinyint not null,
+DocumentSummary nvarchar(MAX) null,
+Document varbinary(MAX) null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.Document
+add constraint PK_DocumentNode primary key (DocumentNode)
+
+
+
+
+create table Production.Illustration(
+IllustrationID int identity(1,1) not null,
+Diagram xml null,
+ModifiedDate datetime not null
+)
+alter table Production.Illustration
+add constraint PK_IllustrationID primary key (IllustrationID)
+
+
+
+
+create table Production.Product(
+ProductID int identity(1,1),
+Name nvarchar(50) not null,
+ProductNumber nvarchar(25) not null,
+MakeFlag bit not null,
+FinishedGoodsFlag bit not null,
+Color nvarchar(15) null,
+SafetyStockLevel smallint not null,
+ReorderPoint smallint not null,
+StandardCost money not null,
+ListPrice money not null,
+Size nvarchar(5) null,
+SizeUnitMeasureCode nchar(3) null,
+WeightUnitMeasureCode nchar(3) null,
+Weight decimal(8, 2) null,
+DaysToManufacture int not null,
+ProductLine nchar(2) null,
+Class nchar(2) null,
+Style nchar(2) null,
+ProductSubcategoryID int null,
+ProductModelID int null,
+SellStartDate datetime not null,
+SellEndDate datetime null,
+DiscontinuedDate datetime null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.Product
+add constraint PK_ProductionProduct primary key (ProductID)
+alter table Production.Product
+add constraint FK_Product_ProductModel_ProductModelID foreign key (ProductModelID) references Production.ProductModel(ProductModelID)
+alter table Production.Product
+add constraint FK_Product_ProductSubcategory_ProductSubcategoryID foreign key (ProductSubcategoryID) references Production.ProductSubcategory(ProductSubcategoryID)
+
+
+
+
+
+
+create table Production.ProductCategory(
+ProductCategoryID int identity(1,1) not null,
+Name nvarchar(50) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductCategory
+add constraint PK_ProductCategoryID primary key (ProductCategoryID)
+
+
+create table Production.ProductDescription(
+ProductDescriptionID int identity(1,1) not null,
+Description nvarchar(400) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductDescription
+add constraint PK_ProductDescriptionID primary key (ProductDescriptionID)
+ 
+
+
+
+create table Production.ProductDocument(
+ProductID int identity(1,1) not null,
+DocumentNode hierarchyid not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductDocument
+add constraint FK_ProductDocument_Document_DocumentNode foreign key (DocumentNode) references Production.Document(DocumentNode)
+alter table Production.ProductDocument
+add constraint FK_ProductDocument_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+
+create table Production.ProductModel(
+ProductModelID int identity(1,1) not null,
+Name nvarchar(50) not null,
+CatalogDescription xml null,
+Instructions xml null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductModel
+add constraint PK_ProductModel primary key (ProductModelID)
+
+
+
+
+create table Production.ProductModelIllustration(
+ProductModelID int identity(1,1) not null,
+IllustrationID int not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductModelIllustration
+add constraint FK_ProductModelIllustration_Illustration_IllustrationID foreign key (IllustrationID) references Production.Illustration(IllustrationID)
+alter table Production.ProductModelIllustration
+add constraint FK_ProductModelIllustration_ProductModel_ProductModelID foreign key (ProductModelID) references Production.ProductModel(ProductModelID)
+
+
+
+
+
+create table Production.ProductModelProductDescriptionCulture(
+ProductModelID int identity(1,1) not null,
+ProductDescriptionID int not null,
+CultureID nchar(6) not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductModelProductDescriptionCulture
+add constraint FK_ProductModelProductDescriptionCulture_Culture_CultureID foreign key (CultureID) references Production.Culture(CultureID)
+alter table Production.ProductModelProductDescriptionCulture
+add constraint FK_ProductModelProductDescriptionCulture_ProductDescription_ProductDescriptionID foreign key (ProductDescriptionID) references Production.ProductDescription(ProductDescriptionID)
+alter table Production.ProductModelProductDescriptionCulture
+add constraint FK_ProductModelProductDescriptionCulture_ProductModel_ProductModelID foreign key (ProductModelID) references Production.ProductModel(ProductModelID)
+
+
+
+
+
+create table Production.ProductPhoto(
+ProductPhotoID int identity(1,1) not null,
+ThumbNailPhoto varbinary(MAX) null,
+ThumbnailPhotoFileName nvarchar(50) null,
+LargePhoto varbinary(MAX) null,
+LargePhotoFileName nvarchar(50) null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductPhoto
+add constraint PK_ProductPhotoID primary key (ProductPhotoID)
+
+
+
+
+
+create table Production.ProductProductPhoto(
+ProductID int identity(1,1) not null,
+ProductPhotoID int not null,
+Primarno bit not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductProductPhoto
+add constraint FK_ProductProductPhoto_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+alter table Production.ProductProductPhoto
+add constraint FK_ProductProductPhoto_ProductPhoto_ProductPhotoID foreign key (ProductPhotoID) references Production.ProductPhoto(ProductPhotoID)
+
+
+
+
+
+create table Production.ProductReview(
+ProductReviewID int identity(1,1) not null,
+ProductID int not null,
+ReviewerName nvarchar(50) not null,
+ReviewDate datetime not null,
+EmailAddress nvarchar(50) not null,
+Rating int not null,
+)
+alter table Production.ProductReview
+add constraint FK_ProductReview_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+create table Production.ProductSubcategory(
+ProductSubcategoryID int identity(1,1) not null,
+ProductCategoryID int not null,
+Name nvarchar(50) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductSubcategory
+add constraint PK_ProductSubcategoryID primary key (ProductSubcategoryID)
+alter table Production.ProductSubcategory
+add constraint FK_ProductSubcategory_ProductCategory_ProductCategoryID foreign key(ProductCategoryID) references  Production.ProductCategory(ProductCategoryID)
+
+
+
+
+
+create table Production.UnitMeasure(
+UnitMeasureCode nchar(3) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null
+)
+alter table Production.UnitMeasure
+add constraint PK_UnitMeasureCode primary key (UnitMeasureCode)
+
+
+
+--Manufacturing
+
+create table Production.BillOfMaterials(
+BillOfMaterialsID int identity(1,1) not null,
+ProductAssemblyID int not null,
+ComponentID int not null,
+StartDate datetime not null,
+EndDate datetime null,
+UnitMeasureCode nchar(3) not null,
+BOMLevel smallint not null,
+PerAssemblyQty decimal(8, 2) not null,
+ModifiedDate datetime not null
+)
+alter table Production.BillOfMaterials
+add constraint PK_BillOfMaterialsID primary key (BillOfMaterialsID)
+alter table Production.BillOfMaterials
+add constraint FK_BillOfMaterials_Product_ComponentID foreign key (ComponentID) references Production.Product(ProductID)
+alter table Production.BillOfMaterials
+add constraint FK_BillOfMaterials_Product_ProductAssemblyID foreign key (ProductAssemblyID) references Production.Product(ProductID)
+alter table Production.BillOfMaterials
+add constraint FK_BillOfMaterials_UnitMeasure_UnitMeasureCode foreign key (UnitMeasureCode) references Production.UnitMeasure(UnitMeasureCode)
+
+
+create table Production.ProductCostHistory(
+ProductID int not null,
+StartDate datetime not null,
+EndDate datetime,
+StandardCost money not null
+)
+alter table Production.ProductCostHistory
+add constraint FK_ProductCostHistory_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+create table Production.ProductListPriceHistory(
+ProductID int not null,
+StartDate datetime not null,
+EndDate datetime,
+ListPrice money not null,
+ModifiedDate datetime not null
+)
+alter table Production.ProductListPriceHistory
+add constraint FK_ProductListPriceHistory_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+create table Production.ScrapReason(
+ScrapReasonID smallint identity(1,1) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime
+)
+alter table Production.ScrapReason
+add constraint PK_ScrapReasonID primary key (ScrapReasonID)
+
+
+create table Production.TransactionHistory(
+TransactionID int identity (1,1) not null,
+ProductID int not null,
+ReferenceOrderID int not null,
+ReferenceOrderLineID int not null,
+TransactionDate datetime not null,
+TransactionType nchar(1) not null,
+Quantity int not null,
+ActualCost money not null,
+ModifiedDate datetime not null
+)
+
+alter table Production.TransactionHistory
+add constraint PK_TransactionID primary key (TransactionID)
+alter table Production.TransactionHistory
+add constraint FK_TransactionHistory_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+
+create table Production.TransactionHistoryArchive(
+TransactionID int not null,
+ProductID int not null,
+ReferenceOrderID int not null,
+ReferenceOrderLineID int not null,
+TransactionDate datetime not null,
+TransactionType nchar(1) not null,
+Quantity int not null,
+ActualCost money not null,
+ModifiedDate datetime not null
+)
+alter table Production.TransactionHistoryArchive
+add constraint FK_TransactionHistoryArchive_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+
+create table Production.WorkOrder(
+WorkOrderID int identity(1,1),
+ProductID int  not null,
+OrderQty int not null,
+StockedQty int not null,
+ScrappedQty smallint not null,
+StartDate datetime not null,
+EndDate datetime null,
+DueDate datetime not null,
+ScrapReasonID smallint null,
+ModifiedDate datetime not null
+)
+alter table Production.WorkOrder
+add constraint PK_WorkOrderID primary key (WorkOrderID)
+alter table Production.WorkOrder
+add constraint FK_WorkOrder_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+alter table Production.WorkOrder
+add constraint FK_WorkOrder_ScrapReason_ScrapReasonID foreign key (ScrapReasonID) references Production.ScrapReason(ScrapReasonID)
+
+
+
+
+create table Production.WorkOrderRouting(
+WorkOrderID int not null,
+ProductID int not null,
+OperationSequence smallint not null,
+LocationID smallint not null,
+ScheduledStartDate datetime not null,
+ScheduledEndDate datetime not null,
+ActualStartDate datetime null,
+ActualEndDate datetime null,
+ActualResourceHrs decimal(9, 4) null,
+PlannedCost money not null,
+ActualCost money null,
+ModifiedDate datetime not null
+)
+
+alter table Production.WorkOrderRouting
+add constraint FK_WorkOrderRouting_Location_LocationID foreign key (LocationID) references Production.Location(LocationID) 
+alter table Production.WorkOrderRouting
+add constraint FK_WorkOrderRouting_WorkOrder_WorkOrderID foreign key (WorkOrderID) references Production.WorkOrder(WorkOrderID)
+
+
+
+
+
+
+
+--Inventory
+
+
+create table Production.Location(
+LocationID smallint identity(1,1) not null,
+Name nvarchar(50) not null,
+CostRate smallmoney not null,
+Availability decimal(8, 2) not null,
+ModifiedDate datetime not null
+)
+alter table Production.Location
+add constraint PK_Location primary key (LocationID)
+
+
+
+
+
+create table  Production.ProductInventory(
+ProductID int not null,
+LocationID smallint not null,
+Shelf nvarchar(10) not null,
+Bin tinyint not null,
+Quantity smallint not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null,
+)
+alter table Production.ProductInventory
+add constraint FK_ProductInventory_Location_LocationID foreign key (LocationID) references Production.Location(LocationID)
+alter table Production.ProductInventory
+add constraint FK_ProductInventory_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+
+
+--Purchasing
+
+create table Purchasing.ProductVendor(
+ProductID int not null,
+BusinessEntityID int not null,
+AverageLeadTime int not null,
+StandardPrice money not null,
+LastReceiptCost money null,
+LastReceiptDate datetime null,
+MinOrderQty int not null,
+MaxOrderQty int not null,
+OnOrderQty int,
+UnitMeasureCode nchar(3) not null,
+ModifiedDate datetime not null
+)
+alter table Purchasing.ProductVendor
+add constraint FK_PurchasingProductVendor_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+alter table Purchasing.ProductVendor
+add constraint FK_ProductVendor_UnitMeasure_UnitMeasureCode foreign key (UnitMeasureCode) references Production.UnitMeasure(UnitMeasureCode)
+alter table Purchasing.ProductVendor
+add constraint FK_ProductVendor_Vendor_BusinessEntityID foreign key (BusinessEntityID) references Purchasing.Vendor(BusinessEntityID)
+
+
+create table Purchasing.PurchaseOrderDetail(
+PurchaseOrderID int not null,
+PurchaseOrderDetailID int identity(1,1) not null,
+DueDate datetime not null,
+OrderQty smallint not null,
+ProductID int not null,
+UnitPrice money not null,
+LineTotal money not null,
+ReceivedQty decimal(8, 2) not null,
+RejectedQty decimal(8, 2) not null,
+StockedQty decimal(9, 2) not null,
+ModifiedDate datetime not null
+)
+alter table Purchasing.PurchaseOrderDetail
+add constraint PK_PurchasingPurchaseOrderDetailID primary key (PurchaseOrderDetailID)
+alter table Purchasing.PurchaseOrderDetail
+add constraint FK_PurchaseOrderDetail_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+alter table Purchasing.PurchaseOrderDetail
+add constraint FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID foreign key (PurchaseOrderID) references Purchasing.PurchaseOrderHeader(PurchaseOrderID)
+
+
+
+
+create table Purchasing.PurchaseOrderHeader(
+PurchaseOrderID int identity(1,1) not null,
+RevisionNumber tinyint not null,
+Status tinyint not null,
+EmployeeID int not null,
+VendorID int not null,
+ShipMethodID int not null,
+OrderDate datetime not null,
+ShipDate datetime null,
+SubTotal money not null,
+TaxAmt money not null,
+Freight money not null,
+TotalDue money not null,
+ModifiedDate datetime not null
+)
+alter table Purchasing.PurchaseOrderHeader
+add constraint PK_PurchaseOrderID primary key (PurchaseOrderID)
+alter table Purchasing.PurchaseOrderHeader
+add constraint FK_PurchaseOrderHeader_Employee_EmployeeID foreign key (EmployeeID) references HumanResources.Employee(BusinessEntityID)
+alter table Purchasing.PurchaseOrderHeader  
+add constraint FK_PurchaseOrderHeader_ShipMethod_ShipMethodID foreign key (ShipMethodID) references Purchasing.ShipMethod(ShipMethodID)
+alter table Purchasing.PurchaseOrderHeader
+add constraint FK_PurchaseOrderHeader_Vendor_VendorID foreign key (VendorID) references Purchasing.Vendor(BusinessEntityID)
+
+
+
+
+
+create table Purchasing.ShipMethod(
+ShipMethodID int identity(1,1) not null,
+Name nvarchar(50) not null,
+ShipBase money not null,
+ShipRate money not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Purchasing.ShipMethod
+add constraint PK_ShipMethodID primary key (ShipMethodID)
+
+
+
+
+
+create table Purchasing.Vendor(
+BusinessEntityID int identity(1,1) not null,
+AccountNumber nvarchar(15) not null,
+Name nvarchar(50) not null,
+CreditRating tinyint not null,
+PreferredVendorStatus bit not null,
+ActiveFlag bit not null,
+PurchasingWebServiceURL nvarchar(1024) not null,
+ModifiedDate datetime not null
+)
+alter table Purchasing.Vendor
+add constraint PK_PurchasingVendor primary key (BusinessEntityID)
+alter table Purchasing.Vendor
+add constraint FK_Vendor_BusinessEntity_BusinessEntityID foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+
+
+
+
+
+
+
+--Sales
+
+create table Sales.CountryRegionCurrency(
+CountryRegionCode nvarchar(3) not null,
+CurrencyCode nchar(3) not null,
+ModifiedDate datetime not null
+)
+alter table Sales.CountryRegionCurrency
+add constraint FK_CountryRegionCurrency_CountryRegion_CountryRegionCode foreign key (CountryRegionCode) references Person.CountryRegion(CountryRegionCode)
+alter table Sales.CountryRegionCurrency
+add constraint FK_CountryRegionCurrency_Currency_CurrencyCode foreign key (CurrencyCode) references Sales.Currency(CurrencyCode)
+
+
+
+
+
+create table Sales.CreditCard(
+CreditCardID int identity(1,1) not null,
+CardType nvarchar(50) not null,
+CardNumber nvarchar(25)  not null,
+ExpMonth tinyint not null,
+ExpYear smallint not null,
+ModifiedDate datetime not null
+)
+alter table Sales.CreditCard
+add constraint PK_CreditCardID primary key (CreditCardID)
+
+
+
+
+
+create table Sales.Currency(
+CurrencyCode nchar(3) not null,
+Name nvarchar(50) not null,
+ModifiedDate datetime not null
+)
+alter table Sales.Currency
+add constraint PK_CurrencyCode primary key (CurrencyCode)
+
+
+
+
+create table Sales.CurrencyRate(
+CurrencyRateID int identity(1,1) not null,
+CurrencyRateDate datetime not null,
+FromCurrencyCode nchar(3) not null,
+ToCurrencyCode nchar(3) not null,
+AverageRate money not null,
+EndOfDayRate money not null,
+ModifiedDate datetime
+)
+alter table Sales.CurrencyRate
+add constraint PK_CurrencyRateID primary key (CurrencyRateID)
+alter table Sales.CurrencyRate
+add constraint FK_CurrencyRate_Currency_FromCurrencyCode foreign key (FromCurrencyCode) references Sales.Currency(CurrencyCode)
+alter table Sales.CurrencyRate
+add constraint FK_CurrencyRate_Currency_ToCurrencyCode foreign key (ToCurrencyCode) references Sales.Currency(CurrencyCode)
+
+
+
+
+create table Sales.Customer(
+CustomerID int identity(1,1),
+PersonID int,
+StoreID int,
+TerritoryID int,
+AccountNumber varchar(10) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.Customer
+add constraint PK_CustomerID primary key (CustomerID)
+alter table Sales.Customer
+add constraint FK_Customer_Person_PersonID foreign key (PersonID) references Person.Person(BusinessEntityID)
+alter table Sales.Customer
+add constraint FK_Customer_SalesTerritory_TerritoryID foreign key (TerritoryID)references Sales.SalesTerritory(TerritoryID)
+alter table Sales.Customer
+add constraint FK_Customer_Store_StoreID foreign key (StoreID) references Sales.Store(BusinessEntityID)
+
+
+
+
+
+create table Sales.PersonCreditCard(
+BusinessEntityID int not null,
+CreditCardID int identity(1,1) not null,
+ModifiedDate datetime not null
+)
+alter table Sales.PersonCreditCard
+add constraint PK_PK_PersonCreditCard_BusinessEntityID_CreditCardID primary key (BusinessEntityID,CreditCardID)
+alter table Sales.PersonCreditCard
+add constraint FK_PersonCreditCard_CreditCard_CreditCardID foreign key (CreditCardID) references  Sales.CreditCard(CreditCardID)
+alter table Sales.PersonCreditCard 
+add constraint FK_PersonCreditCard_Person_BusinessEntityID foreign key (BusinessEntityID) references Person.Person(BusinessEntityID)
+
+
+
+
+create table Sales.SalesOrderDetail(
+SalesOrderID int not null,
+SalesOrderDetailID int identity(1,1) not null,
+CarrierTrackingNumber nvarchar(25),
+OrderQty smallint not null,
+ProductID int not null,
+SpecialOfferID int not null,
+UnitPrice money not null,
+UnitPriceDiscount money not null,
+LineTotal numeric(38, 6) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesOrderDetail
+add constraint FK_SalesOrderDetail_SalesOrderHeaderID foreign key (ProductID) references Production.Product(ProductID)
+alter table Sales.SalesOrderDetail
+add constraint FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID foreign key (SalesOrderID) references Sales.SalesOrderHeader(SalesOrderID)
+alter table Sales.SalesOrderDetail
+add constraint FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID foreign key (SpecialOfferID,ProductID) references Sales.SpecialOfferProduct(SpecialOfferID,ProductID)
+
+
+
+
+create table Sales.SalesOrderHeader(
+SalesOrderID int identity(1,1) not null,
+RevisionNumber tinyint not null,
+OrderDate datetime not null,
+DueDate datetime not null,
+ShipDate datetime,
+Status tinyint not null,
+OnlineOrderFlag bit  not null,
+SalesOrderNumber nvarchar(25) not null,
+PurchaseOrderNumber nvarchar(25),
+AccountNumber nvarchar(15),
+CustomerID int not null,
+SalesPersonID int,
+TerritoryID int,
+BillToAddressID int not null,
+ShipToAddressID int not null,
+ShipMethodID int not null,
+CreditCardID int,
+CreditCardApprovalCode varchar(15),
+CurrencyRateID int,
+SubTotal money not null,
+TaxAmt money not null,
+Freight money not null,
+TotalDue money not null,
+Comment nvarchar(128),
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesOrderHeader
+add constraint PK_SalesOrderHeader_SalesOrderID primary key (SalesOrderID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_Address_BillToAddressID foreign key (BillToAddressID) references Person.Address(AddressID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_Address_ShipToAddressID foreign key (ShipToAddressID) references Person.Address(AddressID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_CreditCard_CreditCardID foreign key (CreditCardID) references Sales.CreditCard(CreditCardID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_CurrencyRate_CurrencyRateID foreign key (CurrencyRateID) references Sales.CurrencyRate(CurrencyRateID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_Customer_CustomerID foreign key (CustomerID) references Sales.Customer(CustomerID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_SalesPerson_SalesPersonID foreign key (SalesPersonID) references Sales.SalesPerson(BusinessEntityID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_SalesTerritory_TerritoryID foreign key (TerritoryID) references Sales.SalesTerritory(TerritoryID)
+alter table Sales.SalesOrderHeader
+add constraint FK_SalesOrderHeader_ShipMethod_ShipMethodID foreign key (ShipMethodID) references Purchasing.ShipMethod(ShipMethodID)
+
+
+
+
+
+
+
+create table Sales.SalesOrderHeaderSalesReason(
+SalesOrderID int identity(1,1) not null,
+SalesReasonID int  not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesOrderHeaderSalesReason
+add constraint PK_SalesOrderHeaderSalesReason_SalesOrderID_SalesReasonID primary key (SalesOrderID, SalesReasonID)
+alter table Sales.SalesOrderHeaderSalesReason
+add constraint FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID foreign key (SalesOrderID) references Sales.SalesOrderHeader(SalesOrderID)
+alter table Sales.SalesOrderHeaderSalesReason
+add constraint FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID foreign key (SalesReasonID) references Sales.SalesReason(SalesReasonID)
+
+
+
+
+
+create table Sales.SalesPerson(
+BusinessEntityID int identity(1,1) not null,
+TerritoryID int,
+SalesQuota money,
+Bonus money not null,
+CommissionPct smallmoney not null,
+SalesYTD money not null,
+SalesLastYear money not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+Alter table Sales.SalesPerson
+add constraint PK_SalesPerson_BusinessEntityID primary key (BusinessEntityID)
+Alter table Sales.SalesPerson
+add constraint FK_SalesPerson_Employee_BusinessEntityID foreign key (BusinessEntityID) references HumanResources.Employee(BusinessEntityID)
+Alter table Sales.SalesPerson
+add constraint FK_SalesPerson_SalesTerritory_TerritoryID foreign key (TerritoryID) references  Sales.SalesTerritory(TerritoryID)
+
+
+
+
+
+create table Sales.SalesPersonQuotaHistory(
+BusinessEntityID int not null,
+QuotaDate datetime not null,
+SalesQuota money not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesPersonQuotaHistory
+add constraint PK_SalesPersonQuotaHistory_BusinessEntityID_QuotaDate primary key (BusinessEntityID, QuotaDate)
+alter table Sales.SalesPersonQuotaHistory
+add constraint FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID foreign key (BusinessEntityID) references Sales.SalesPerson(BusinessEntityID)
+
+
+
+
+create table Sales.SalesReason(
+SalesReasonID int not null,
+Name nvarchar(50) not null,
+ReasonType nvarchar(50) not null,
+ModifiedDate datetime
+)
+alter table Sales.SalesReason
+add constraint PK_SalesReasonID primary key (SalesReasonID)
+
+
+
+create table Sales.SalesTaxRate(
+SalesTaxRateID int identity(1,1) not null,
+StateProvinceID int not null,
+TaxType tinyint not null,
+TaxRate smallmoney not null,
+Name nvarchar(50) not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesTaxRate
+add constraint FK_SalesTaxRate_StateProvince_StateProvinceID foreign key (StateProvinceID) references Person.StateProvince(StateProvinceID)
+
+
+
+
+
+create table Sales.SalesTerritory(
+TerritoryID int identity(1,1) not null,
+Name nvarchar(50) not null,
+CountryRegionCode nvarchar(3) not null,
+Grup nvarchar(50) not null,
+SalesYTD money not null,
+SalesLastYear money not null,
+CostYTD money not null,
+CostLastYear money not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesTerritory
+add constraint PK_TerritoryID primary key (TerritoryID)
+alter table Sales.SalesTerritory
+add constraint FK_SalesTerritory_CountryRegion_CountryRegionCode foreign key (CountryRegionCode) references Person.CountryRegion(CountryRegionCode)
+
+
+
+
+
+create table Sales.SalesTerritoryHistory(
+BusinessEntityID int not null,
+TerritoryID int not null,
+StartDate datetime not null,
+EndDate datetime,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SalesTerritoryHistory
+add constraint PK_SalesTerritoryHistory_BusinessEntityID_StartDate_TerritoryID primary key (BusinessEntityID, StartDate,TerritoryID)
+alter table Sales.SalesTerritoryHistory
+add constraint FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID foreign key (BusinessEntityID) references Sales.SalesPerson(BusinessEntityID)
+alter table Sales.SalesTerritoryHistory
+add constraint FK_SalesTerritoryHistory_SalesTerritory_TerritoryID foreign key (TerritoryID) references Sales.SalesTerritory(TerritoryID)
+
+
+
+
+create table Sales.ShoppingCartItem(
+ShoppingCartItemID int identity(1,1) not null,
+ShoppingCartID nvarchar(50) not null,
+Quantity int not null,
+ProductID int not null,
+DateCreated datetime not null,
+ModifiedDate datetime not null
+)
+alter table Sales.ShoppingCartItem
+add constraint PK_ShoppingCartItem_ShoppingCartItemID primary key (ShoppingCartItemID)
+alter table Sales.ShoppingCartItem
+add constraint FK_ShoppingCartItem_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+
+
+
+
+create table Sales.SpecialOffer(
+SpecialOfferID int identity(1,1) not null,
+Description nvarchar(255) not null,
+DiscountPct smallmoney not null,
+Type nvarchar(50) not null,
+Category nvarchar(50) not null,
+StartDate datetime  not null,
+EndDate datetime not null,
+MinQty int not null,
+MaxQty int,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+alter table Sales.SpecialOffer
+add constraint PK_SpecialOffer_SpecialOfferID primary key (SpecialOfferID)
+
+
+
+
+
+create table Sales.SpecialOfferProduct(
+SpecialOfferID int identity(1,1) not null,
+ProductID int not null,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+Alter table Sales.SpecialOfferProduct
+add constraint PK_SpecialOfferProduct_SpecialOfferID_ProductID primary key (SpecialOfferID, ProductID)
+Alter table Sales.SpecialOfferProduct
+add constraint FK_SpecialOfferProduct_Product_ProductID foreign key (ProductID) references Production.Product(ProductID)
+Alter table Sales.SpecialOfferProduct
+add constraint FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID foreign key (SpecialOfferID) references Sales.SpecialOffer(SpecialOfferID)
+
+
+
+
+create table Sales.Store(
+BusinessEntityID int not null,
+Name nvarchar(50) not null,
+SalesPersonID int,
+Demographics xml,
+rowguid uniqueidentifier not null,
+ModifiedDate datetime not null
+)
+Alter table Sales.Store
+add constraint PK_SalesBusinessID primary key (BusinessEntityID)
+Alter table Sales.Store
+add constraint FK_Store_BusinessEntity_BusinessEntityID foreign key (BusinessEntityID) references Person.BusinessEntity(BusinessEntityID)
+
